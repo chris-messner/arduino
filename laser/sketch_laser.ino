@@ -47,7 +47,7 @@ void loop()
     // Serial.print("MotionDetector: ");
     // Serial.println(Vout);
 
-    /* check first photoresistor to see if light is present */
+    /* check first photoresistor and measure how much light is present */
     pr1 = analogRead(PhotoResistor1);   
     if (pr1>0) 
     {
@@ -61,14 +61,18 @@ void loop()
         digitalWrite(GreenLED1, LOW);
         digitalWrite(RedLED1, HIGH);
       }
-      // Serial.print("Vout1: ");
-      // Serial.println(Vout);
+    } else {
+      digitalWrite(GreenLED1, LOW);
+      digitalWrite(RedLED1, HIGH);
     }
+    // Serial.print("Vout1: ");
+    // Serial.println(Vout);
 
-    /* check second photoresistor to see if light is present */
+
+    /* check second photoresistor and measure how much light is present */
     pr2 = analogRead(PhotoResistor2);
     if (pr2>0) 
-     {
+    {
       buffer= pr2 * Vin;
       Vout= (buffer)/1024.0;
       if(Vout > Threshold)
@@ -79,9 +83,13 @@ void loop()
         digitalWrite(GreenLED2, LOW);
         digitalWrite(RedLED2, HIGH);
       }
-      // Serial.print("Vout2: ");
-      // Serial.println(Vout);
+    } else {
+      digitalWrite(GreenLED2, LOW);
+      digitalWrite(RedLED2, HIGH);
     }
+    // Serial.print("Vout2: ");
+    // Serial.println(Vout);
+  
   } else {
     /* no motion detected - power down the lasers & LEDs */
     digitalWrite(Laser1, LOW);
