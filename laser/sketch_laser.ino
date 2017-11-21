@@ -1,61 +1,95 @@
-int PR1 = 0;
-int PR2 = 1;
-int green1 = 12;
-int red1 = 11;
-int green2 = 10;
-int red2 = 9;
+int MotionDetector = 0;
+int PhotoResistor1 = 1;
+int PhotoResistor2 = 2;
 
-int raw= 0;
-int Vin= 5;
-float Vout= 0;
-float buffer= 0;
+int GreenLED1 = 12;
+int RedLED1 = 11;
+int GreenLED2 = 10;
+int RedLED2 = 9;
+int Laser1 = 5;
+int Laser2 = 6;
+
+float Threshold = 0.5;
+
+float raw = 0;
+float pr1 = 0;
+float pr2 = 0;
+int Vin = 5;
+float Vout = 0;
+float buffer = 0;
 
 void setup()
 {
-  Serial.begin(9600);
-  pinMode(green1, OUTPUT);
-  pinMode(red1, OUTPUT);
-  pinMode(green2, OUTPUT);
-  pinMode(red2, OUTPUT);  
+  // Serial.begin(9600);
+  pinMode(GreenLED1, OUTPUT);
+  pinMode(RedLED1, OUTPUT);
+  pinMode(GreenLED2, OUTPUT);
+  pinMode(RedLED2, OUTPUT); 
+  pinMode(Laser1, OUTPUT);
+  pinMode(Laser2, OUTPUT); 
+  digitalWrite(Laser1, LOW);
+  digitalWrite(Laser2, LOW);
+  digitalWrite(RedLED1, LOW);      
+  digitalWrite(GreenLED1, LOW);      
+  digitalWrite(RedLED2, LOW);      
+  digitalWrite(GreenLED2, LOW);      
 }
 
 
 void loop()
 {
-  raw= analogRead(PR1);
-  if(raw) 
+  raw = analogRead(MotionDetector);
+  if (raw>0)   
   {
-    buffer= raw * Vin;
-    Vout= (buffer)/1024.0;
-    buffer= (Vin/Vout) -1;
-    if(Vout > .5)
-    {
-      digitalWrite(green1, HIGH);
-      digitalWrite(red1, LOW);
-    } else {
-      digitalWrite(red1, HIGH);
-      digitalWrite(green1, LOW);
-    }
-    Serial.print("Vout1: ");
-    Serial.println(Vout);
-  }
+    /* motion detected - power up the lasers */
+    digitalWrite(Laser1, HIGH);
+    digitalWrite(Laser2, HIGH);
+    // Serial.print("MotionDetector: ");
+    // Serial.println(Vout);
 
-  raw= analogRead(PR2);
-  if(raw) 
-  {
-    buffer= raw * Vin;
-    Vout= (buffer)/1024.0;
-    buffer= (Vin/Vout) -1;
-    if(Vout > .5)
+    /* check first photoresistor to see if light is present */
+    pr1 = analogRead(PhotoResistor1);   
+    if (pr1>0) 
     {
-      digitalWrite(green2, HIGH);
-      digitalWrite(red2, LOW);
-    } else {
-      digitalWrite(red2, HIGH);
-      digitalWrite(green2, LOW);
+      buffer= pr1 * Vin;
+      Vout= (buffer)/1024.0;
+      if(Vout > Threshold)
+      {
+        digitalWrite(GreenLED1, HIGH);
+        digitalWrite(RedLED1, LOW);
+      } else {
+        digitalWrite(GreenLED1, LOW);
+        digitalWrite(RedLED1, HIGH);
+      }
+      // Serial.print("Vout1: ");
+      // Serial.println(Vout);
     }
-    Serial.print("Vout2: ");
-    Serial.println(Vout);
+
+    /* check second photoresistor to see if light is present */
+    pr2 = analogRead(PhotoResistor2);
+    if (pr2>0) 
+     {
+      buffer= pr2 * Vin;
+      Vout= (buffer)/1024.0;
+      if(Vout > Threshold)
+      {
+        digitalWrite(GreenLED2, HIGH);
+        digitalWrite(RedLED2, LOW);
+      } else {
+        digitalWrite(GreenLED2, LOW);
+        digitalWrite(RedLED2, HIGH);
+      }
+      // Serial.print("Vout2: ");
+      // Serial.println(Vout);
+    }
+  } else {
+    /* no motion detected - power down the lasers & LEDs */
+    digitalWrite(Laser1, LOW);
+    digitalWrite(Laser2, LOW);
+    digitalWrite(RedLED1, LOW);      
+    digitalWrite(GreenLED1, LOW);      
+    digitalWrite(RedLED2, LOW);      
+    digitalWrite(GreenLED2, LOW);     
   }
   delay(500);
 }
